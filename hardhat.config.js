@@ -20,21 +20,18 @@ module.exports = {
   solidity: {
     compilers: [
       {
-        version: '0.8.15',
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200
-          },
-          viaIR: true
-        },
-      },
-      {
         version: '0.8.17',
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200
+            runs: 2000,
+            details: {
+              yul: true,
+              yulDetails: {
+                stackAllocation: true,
+                optimizerSteps: "dhfoDgvulfnTUtnIf"
+              }
+            }
           },
           viaIR: true
         },
