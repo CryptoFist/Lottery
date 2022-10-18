@@ -123,29 +123,32 @@ describe ("lottery testing", function () {
         this.totalTickets = ticketAmount;
         let price = BigInt(ticketPrice) * BigInt(ticketAmount);
         let lotterId = await this.lottery.lotteryId();
-        let expectPriceForVault = BigInt(price) * BigInt(swapPercent) / BigInt(100);
+        let swapAmount = BigInt(price) * BigInt(swapPercent) / BigInt(100);
 
         const amounts = await this.uniswapRouter.getAmountsOut(
-            expectPriceForVault,
+            swapAmount,
             [
                 this.usdc.address,
                 this.usdt.address
             ]
         );
-        expectPriceForVault = amounts[1];
+        let expectPriceForVault = amounts[1];
 
         let beforeTicketAmount = await this.ticketNFT.balanceOf(this.buyer_1.address, lotterId);
         let beforeSwapTokenAmount = await this.usdt.balanceOf(this.lotteryVault.address);
 
         await this.usdc.connect(this.buyer_1).approve(this.lottery.address, BigInt(price));
-        await expect (
-            this.lottery.connect(this.buyer_1).buyTicket(ticketAmount)
-        ).to.be.emit(this.lottery, "TicketSale")
-        .withArgs(
-            1, 
-            BigInt(price), 
-            this.totalTickets
-        );
+        let tx = await this.lottery.connect(this.buyer_1).buyTicket(ticketAmount);
+
+        let receipt = await tx.wait();
+        let events = receipt.events?.filter((x) => { return x.event == "TicketSale" });
+        expect (events[0].args.saleId).to.be.equal(1);
+        expect(BigInt(events[0].args.ticketPrice)).to.be.equal(BigInt(price));
+        expect (events[0].args.totalTickets).to.be.equal(this.totalTickets);
+
+        events = receipt.events?.filter((x) => { return x.event == "SwappedPriceTokens" });
+        expect (events[0].args.saleId).to.be.equal(1);
+        expect(events[0].args.swappedAmount).to.be.equal(BigInt(swapAmount));
 
         let afterTicketAmount = await this.ticketNFT.balanceOf(this.buyer_1.address, lotterId);
         let afterSwapTokenAmount = await this.usdt.balanceOf(this.lotteryVault.address);
@@ -183,6 +186,7 @@ describe ("lottery testing", function () {
         ticketPrice = await this.lottery.ticketPrice();
         price = BigInt(ticketPrice) * BigInt(ticketAmount);
         await this.usdc.connect(this.buyer_3).approve(this.lottery.address, BigInt(price));
+
         await expect(
             this.lottery.connect(this.buyer_3).buyTicket(ticketAmount)
         ).to.be.revertedWith("exceeds max amount");
@@ -192,9 +196,17 @@ describe ("lottery testing", function () {
         ticketAmount = await this.lottery.leftTicketCnt();
         price = BigInt(ticketPrice) * BigInt(ticketAmount);
         await this.usdc.connect(this.buyer_3).approve(this.lottery.address, BigInt(price));
-        await this.lottery.connect(this.buyer_3).buyTicket(ticketAmount);
+
+        let tx = await this.lottery.connect(this.buyer_3).buyTicket(ticketAmount);
         const afterLotteryId = await this.lottery.lotteryId();
         const winner = await this.lottery.getWinner(afterLotteryId - 1);
+        let receipt = await tx.wait();
+        let events = receipt.events?.filter((x) => { return x.event == "CreatedLottery" });
+        expect(events[0].args.lotteryId).to.be.equal(afterLotteryId);
+        events = receipt.events?.filter((x) => { return x.event == "WinnerForLottery" });
+        expect(events[0].args.winner).to.be.equal(winner);
+        expect(events[0].args.lotteryId).to.be.equal(beforeLotteryId);
+        
         const rewardNFTBal = await this.rewardNFT.balanceOf(winner);
 
         expect (afterLotteryId - beforeLotteryId).to.be.equal(1);
