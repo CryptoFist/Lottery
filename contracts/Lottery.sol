@@ -13,12 +13,6 @@ import "hardhat/console.sol";
 contract Lottery is Ownable, ILottery {
     using SafeERC20 for IERC20;
 
-    struct lottery {
-        uint256 index;
-        address[] holders;
-        address winner;
-    }
-
     uint256 public thresholdTicketCnt = 10;
     uint256 public maxBuyTicketCnt = 3;
     uint256 public ticketPrice;
@@ -33,7 +27,15 @@ contract Lottery is Ownable, ILottery {
     address private lotteryVault;
     IUniswapV2Router02 private router;
     uint256 private swapPercent;
+    bool private isLocked = false;
     mapping(uint256 => lottery) private lotteries;
+
+    modifier lock {
+        require (isLocked == false, "locked");
+        isLocked = true;
+        _;
+        isLocked = false;
+    }
 
     constructor (
         uint256 ticketPrice_,
@@ -55,60 +57,46 @@ contract Lottery is Ownable, ILottery {
         router = IUniswapV2Router02(router_);
     }
 
-    /// @notice Update ticket price
-    /// @dev Only owner can call this function.
-    /// @param newTicketPrice_ New ticket price.
-    function modifyTicketPrice(uint256 newTicketPrice_) external onlyOwner {
+    /// @inheritdoc	ILottery
+    function modifyTicketPrice(uint256 newTicketPrice_) external override onlyOwner {
         ticketPrice = newTicketPrice_;        
     }
 
-    /// @notice Update swap percent.
-    /// @dev Only owner can call this function.
-    /// @param newSwapPercent_ New swap percent.
-    function modifySwapPercent(uint256 newSwapPercent_) external onlyOwner {
+    /// @inheritdoc	ILottery
+    function modifySwapPercent(uint256 newSwapPercent_) external override onlyOwner {
         swapPercent = newSwapPercent_;
     }
 
-    /// @notice Update max ticket count users can buy once.
-    /// @dev Only owner can call this function.
-    /// @param newCnt_ New max count.
-    function modifyMaxBuyTicketCnt(uint256 newCnt_) external onlyOwner {
+    /// @inheritdoc	ILottery
+    function modifyMaxBuyTicketCnt(uint256 newCnt_) external override onlyOwner {
         maxBuyTicketCnt = newCnt_;
     }
 
-    /// @notice Update threshold ticket count.
-    /// @dev Only owner can call this function.
-    /// @param newThreshold_ New ticket price.
-    function modifyThresholdTicketCnt(uint256 newThreshold_) external onlyOwner {
+    /// @inheritdoc	ILottery
+    function modifyThresholdTicketCnt(uint256 newThreshold_) external override onlyOwner {
         thresholdTicketCnt = newThreshold_;
     }
 
-    /// @notice Get ticket price.
-    /// @return Ticket price as priceToken.
-    function getTicketPrice() external view returns (uint256) {
+    /// @inheritdoc	ILottery
+    function getTicketPrice() external view override returns (uint256) {
         return ticketPrice;
     }
 
-    /// @notice Get left tickets on current lottery.
-    /// @return Return left ticket count.
-    function leftTicketCnt() external view returns (uint256) {
+    /// @inheritdoc	ILottery
+    function leftTicketCnt() external view override returns (uint256) {
         lottery memory curLottery = lotteries[lotteryId];
         uint256 leftTicketcnt = thresholdTicketCnt - curLottery.index;
         return (leftTicketcnt >= maxBuyTicketCnt ? maxBuyTicketCnt : leftTicketcnt);
     }
 
-    /// @notice Get winner address.
-    /// @param lotteryId_ The past lottery id.
-    /// @return Address of winner.
-    function getWinner(uint256 lotteryId_) external view returns (address) {
+    /// @inheritdoc	ILottery
+    function getWinner(uint256 lotteryId_) external view override returns (address) {
         require (lotteryId_ < lotteryId, "not finished yet");
         return lotteries[lotteryId_].winner;
     }
 
-    /// @notice Buy tickets with priceToken.
-    /// @dev Users can buy multiple tickets but should be less than max amount.
-    /// @param amount_ The amount of tickets.
-    function buyTicket(uint256 amount_) external {
+    /// @inheritdoc	ILottery
+    function buyTicket(uint256 amount_) external lock override {
         address buyer = msg.sender;
         require (buyer != address(0), "invalid address");
         require (
