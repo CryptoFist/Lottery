@@ -28,10 +28,6 @@ interface ILottery {
     /// @param newThreshold_ New ticket price.
     function modifyThresholdTicketCnt(uint256 newThreshold_) external;
 
-    /// @notice Get ticket price.
-    /// @return Ticket price as priceToken.
-    function getTicketPrice() external view returns (uint256);
-
     /// @notice Get left tickets on current lottery.
     /// @return Return left ticket count.
     function leftTicketCnt() external view returns (uint256);
@@ -46,7 +42,7 @@ interface ILottery {
     /// @param amount_ The amount of tickets.
     function buyTicket(uint256 amount_) external;
 
-    event BuyTicket(uint256 saleId, uint256 ticketPrice, uint256 totalTickets, uint256 fee);
+    event TicketSale(uint256 saleId, uint256 ticketPrice, uint256 totalTickets);
 
     event SwappedPriceTokens(uint256 saleId, uint256 swappedAmount);
 

@@ -24,16 +24,8 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 2000,
-            details: {
-              yul: true,
-              yulDetails: {
-                stackAllocation: true,
-                optimizerSteps: "dhfoDgvulfnTUtnIf"
-              }
-            }
-          },
-          viaIR: true
+            runs: 2000
+          }
         },
       },
     ],

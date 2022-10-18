@@ -140,12 +140,11 @@ describe ("lottery testing", function () {
         await this.usdc.connect(this.buyer_1).approve(this.lottery.address, BigInt(price));
         await expect (
             this.lottery.connect(this.buyer_1).buyTicket(ticketAmount)
-        ).to.be.emit(this.lottery, "BuyTicket")
+        ).to.be.emit(this.lottery, "TicketSale")
         .withArgs(
             1, 
             BigInt(price), 
-            this.totalTickets,
-            0
+            this.totalTickets
         );
 
         let afterTicketAmount = await this.ticketNFT.balanceOf(this.buyer_1.address, lotterId);
@@ -174,12 +173,11 @@ describe ("lottery testing", function () {
         await this.usdc.connect(this.buyer_2).approve(this.lottery.address, BigInt(price));
         await expect (
             this.lottery.connect(this.buyer_2).buyTicket(ticketAmount)
-        ).to.be.emit(this.lottery, "BuyTicket")
+        ).to.be.emit(this.lottery, "TicketSale")
         .withArgs(
             2,
             BigInt(price),
-            this.totalTickets,
-            0
+            this.totalTickets
         );
 
         ticketPrice = await this.lottery.ticketPrice();

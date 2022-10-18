@@ -78,11 +78,6 @@ contract Lottery is Ownable, ILottery {
     }
 
     /// @inheritdoc	ILottery
-    function getTicketPrice() external view override returns (uint256) {
-        return ticketPrice;
-    }
-
-    /// @inheritdoc	ILottery
     function leftTicketCnt() external view override returns (uint256) {
         lottery memory curLottery = lotteries[lotteryId];
         uint256 leftTicketcnt = thresholdTicketCnt - curLottery.index;
@@ -116,7 +111,7 @@ contract Lottery is Ownable, ILottery {
         }
         saleId ++;
         ITicketNFT(ticketNFT).mintNFT(buyer, lotteryId, amount_);
-        emit BuyTicket(saleId, price, totalSoldTickets, 0);
+        emit TicketSale(saleId, price, totalSoldTickets);
 
         _swapAndTransferToVault(price);
         if (curLottery.index == thresholdTicketCnt) {
