@@ -49,4 +49,8 @@ interface ILottery {
     event CreatedLottery(uint256 lotteryId);
 
     event WinnerForLottery(address indexed winner, uint256 lotteryId);
+
+    event CreateTicketNFT(address indexed ticketNFTAddr);
+
+    event CreateRewardNFT(address indexed rewardNFTAddr);
 }

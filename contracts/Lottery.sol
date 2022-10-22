@@ -8,6 +8,8 @@ import "./interfaces/ILottery.sol";
 import "./interfaces/IUniswapV2Router.sol";
 import "./interfaces/ITicketNFT.sol";
 import "./interfaces/IRewardNFT.sol";
+import "./test/RewardNFT.sol";
+import "./test/TicketNFT.sol";
 import "hardhat/console.sol";
 
 contract Lottery is Ownable, ILottery {
@@ -21,9 +23,9 @@ contract Lottery is Ownable, ILottery {
     uint256 public totalSoldTickets;
     address public priceToken;
     address public ticketNFT;
+    address public rewardNFT;
 
     address private swapToken;
-    address private rewardNFT;
     address private lotteryVault;
     IUniswapV2Router02 private router;
     uint256 private swapPercent;
@@ -40,21 +42,22 @@ contract Lottery is Ownable, ILottery {
     constructor (
         uint256 ticketPrice_,
         uint256 swapPercent_,
-        address ticketNFT_,
         address priceToken_,
         address swapToken_,
-        address rewardNFT_,
         address lotteryVault_,
         address router_
     ) {
         ticketPrice = ticketPrice_;
         swapPercent = swapPercent_;
-        ticketNFT = ticketNFT_;
         priceToken = priceToken_;
         swapToken = swapToken_;
-        rewardNFT = rewardNFT_;
         lotteryVault = lotteryVault_;
         router = IUniswapV2Router02(router_);
+        ticketNFT = address(new TicketNFT("Ticket", "TNT"));
+        rewardNFT = address(new RewardNFT("RewardNFT", "RWNT"));
+
+        emit CreateTicketNFT(ticketNFT);
+        emit CreateRewardNFT(rewardNFT);
     }
 
     /// @inheritdoc	ILottery
