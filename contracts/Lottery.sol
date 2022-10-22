@@ -44,6 +44,8 @@ contract Lottery is Ownable, ILottery {
         uint256 swapPercent_,
         address priceToken_,
         address swapToken_,
+        address ticketNFT_,
+        address rewardNFT_,
         address lotteryVault_,
         address router_
     ) {
@@ -53,8 +55,8 @@ contract Lottery is Ownable, ILottery {
         swapToken = swapToken_;
         lotteryVault = lotteryVault_;
         router = IUniswapV2Router02(router_);
-        ticketNFT = address(new TicketNFT("Ticket", "TNT"));
-        rewardNFT = address(new RewardNFT("RewardNFT", "RWNT"));
+        ticketNFT = ticketNFT_;
+        rewardNFT = rewardNFT_;
 
         emit CreateTicketNFT(ticketNFT);
         emit CreateRewardNFT(rewardNFT);
