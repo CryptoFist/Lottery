@@ -4,6 +4,8 @@ const { ethers } = require('hardhat');
 const { deploy } = require('../scripts/utils');
 const { erc20_abi } = require('../external_abi/erc20.abi.json');
 const { uniswap_abi } = require('../external_abi/uniswap.abi.json');
+const { ticketnft_abi } = require('../external_abi/ticketNFT.abi.json');
+const { rewardnft_abi } = require('../external_abi/rewardNFT.abi.json');
 
 const bigNum = num => (num + '0'.repeat(18));
 const smallNum = num => (parseInt(num) / bigNum(1));
@@ -31,20 +33,6 @@ describe ("lottery testing", function () {
         this.usdt = new ethers.Contract(swapTokenAddr, erc20_abi, this.owner);
         this.uniswapRouter = new ethers.Contract(uniswapRouterAddr, uniswap_abi, this.owner);
 
-        this.rewardNFT = await deploy(
-            "RewardNFT",
-            "RewardNFT",
-            "RewardNFT",
-            "RWNT"
-        );
-
-        this.ticketNFT = await deploy(
-            "TicketNFT",
-            "TicketNFT",
-            "Ticket",
-            "TNT"
-        );
-
         ticketPrice = bigNum_6(1000);
         swapPercent = 10;   // 10%
         this.lottery = await deploy(
@@ -52,13 +40,19 @@ describe ("lottery testing", function () {
             "Lottery",
             BigInt(ticketPrice),
             swapPercent,
-            this.ticketNFT.address,
             priceTokenAddr,
             swapTokenAddr,
-            this.rewardNFT.address,
             this.lotteryVault.address,
             uniswapRouterAddr
         );
+    })
+
+    it ("get ticketNFT and rewardNFT handles", async function () {
+        let ticketAddr = await this.lottery.ticketNFT();
+        let rewardAddr = await this.lottery.rewardNFT();
+
+        this.ticketNFT = new ethers.Contract(ticketAddr, ticketnft_abi, this.owner);
+        this.rewardNFT = new ethers.Contract(rewardAddr, rewardnft_abi, this.owner);
     })
 
     it ("swap ETH to USDC", async function () {
