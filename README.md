@@ -1,14 +1,10 @@
 # Lottery
 
-Solidity Test
-
-This is a brief test where you can show-case your skills on solidity development.
-
-Mission Overview
+Goal:
 
 Deliver the requested contract, described below, within a week. This means you have 7 days.
 
-Mission Details
+Details:
 
 Build the following smart contract using the latest solidity version.
 
